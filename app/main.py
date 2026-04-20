@@ -1,19 +1,20 @@
 import os
+from types import TracebackType
+from typing import Optional, Type
 
 
-def run(command: str) -> None:
-    parts = command.split()
+class CleanUpFile:
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
 
-    if len(parts) != 3 or parts[0] != "cp":
-        return
+    def __enter__(self) -> "CleanUpFile":
+        return self
 
-    _, src, dst = parts
-
-    if src == dst:
-        return
-
-    if not os.path.exists(src):
-        return
-
-    with open(src, "r") as fsrc, open(dst, "w") as fdst:
-        fdst.write(fsrc.read())
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
